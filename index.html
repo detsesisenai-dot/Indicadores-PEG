@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell, LabelList
 } from 'recharts';
-import { AlertCircle, CheckCircle2, TrendingUp, Target, Award, Info, Filter } from 'lucide-react';
+import { AlertCircle, CheckCircle, TrendingUp, Target, Award, Info, Filter } from 'lucide-react';
 
 // --- CONJUNTO DE DADOS EXPANDIDO ---
 const rawData = [
@@ -122,7 +122,7 @@ const colors = {
   warning: '#EF4444'
 };
 
-// Formatação à prova de falhas
+// Formatação à prova de falhas para evitar crashes
 const formatValue = (val, formatType) => {
   if (val === undefined || val === null || isNaN(val)) return '-';
   const numVal = Number(val);
@@ -135,6 +135,17 @@ const formatValue = (val, formatType) => {
 export default function App() {
   const [filterCategory, setFilterCategory] = useState('Todos');
   const [selectedIndicator, setSelectedIndicator] = useState(allIndicators[0]);
+
+  // INJEÇÃO AUTOMÁTICA DO TAILWIND PARA O GITHUB PAGES
+  // Isso garante que o layout não fique "corrompido" se a hospedagem não possuir o processamento CSS configurado.
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !document.getElementById('tailwind-cdn')) {
+      const script = document.createElement('script');
+      script.id = 'tailwind-cdn';
+      script.src = 'https://cdn.tailwindcss.com';
+      document.head.appendChild(script);
+    }
+  }, []);
 
   // Lógica de Classificação de Destaques vs Atenção para o DR Goiás
   const indicatorStatusMap = useMemo(() => {
@@ -310,7 +321,7 @@ export default function App() {
               <div className="absolute top-0 right-0 p-4 opacity-20"><Award size={48} color={targetAchieved ? '#10B981' : '#EF4444'}/></div>
               <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Estado da Meta</p>
               <div className="flex items-center gap-2 mt-1">
-                {targetAchieved ? <CheckCircle2 color="#10B981" size={28}/> : <AlertCircle color="#EF4444" size={28}/>}
+                {targetAchieved ? <CheckCircle color="#10B981" size={28}/> : <AlertCircle color="#EF4444" size={28}/>}
                 <h2 className={`text-2xl font-black ${targetAchieved ? 'text-green-400' : 'text-red-400'}`}>
                   {targetAchieved ? 'Destaque Alcançado' : 'Ponto de Atenção'}
                 </h2>
@@ -343,7 +354,8 @@ export default function App() {
                 <BarChart className="w-5 h-5 text-cyan-500" /> 
                 Ranking de Desempenho por Estado
               </h3>
-              <div className="h-[400px] w-full">
+              {/* Estilos inline adicionados na div abaixo para evitar colapso do Recharts se as classes falharem */}
+              <div style={{ width: '100%', height: '400px' }} className="w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={ranking} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -367,7 +379,6 @@ export default function App() {
                       {ranking.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
-                          // Reflexo visual: Se for GO, pinta de Verde (Destaque) ou Vermelho (Atenção). Outros estados cinza.
                           fill={entry.DR === 'GO' ? (targetAchieved ? colors.success : colors.warning) : colors.cardBg} 
                           className="transition-all duration-300 hover:opacity-80"
                         />
@@ -396,7 +407,7 @@ export default function App() {
                   {insights.points.length > 0 && (
                     <div className="mb-6">
                       <h4 className="text-green-400 font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2">
-                        <CheckCircle2 size={16} /> Pontos Positivos
+                        <CheckCircle size={16} /> Pontos Positivos
                       </h4>
                       <ul className="space-y-3">
                         {insights.points.map((point, i) => (
